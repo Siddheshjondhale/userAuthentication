@@ -1,12 +1,11 @@
 package com.example.userAuthentication.controller;
 
-
 import com.example.userAuthentication.entity.User;
 import com.example.userAuthentication.service.UserService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +18,8 @@ import java.util.Map;
 @RequestMapping("/api/users")
 public class UserController {
 
-
-@Autowired
-private UserService userService;
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/google-signin")
     public ResponseEntity<String> googleSignIn(@RequestBody Map<String, String> tokenRequest) {
@@ -31,11 +29,13 @@ private UserService userService;
             // Retrieve the Google Client ID from environment variables
             String clientId = System.getenv("GOOGLE_CLIENT_ID");
 
-            // If the client ID is not set throw an exception
+            // If the client ID is not set, throw an exception
             if (clientId == null || clientId.isEmpty()) {
                 throw new RuntimeException("Google Client ID is not set.");
             }
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
+
+            // Use the GSON factory to verify the token
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                     .setAudience(Collections.singletonList(clientId))
                     .build();
 
@@ -47,12 +47,10 @@ private UserService userService;
                 String name = (String) payload.get("name");
 
                 // Process user information (e.g., save to DB or create session)
-                System.out.println("signed sucessfully buddy "+email);
+                System.out.println("Signed in successfully, user: " + email);
 
                 User user = userService.registerOrUpdateUser(email, userId, name);
                 return ResponseEntity.ok(String.valueOf(user));
-
-//                return ResponseEntity.ok("User signed in successfully: " + email);
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid ID Token");
             }
