@@ -6,7 +6,7 @@ import com.example.userAuthentication.service.UserService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +28,9 @@ private UserService userService;
         String idTokenString = tokenRequest.get("idToken");
 
         try {
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                     .setAudience(Collections.singletonList("1077300351364-u2t3sipd82lq1fcsaaee9c11or7irhag.apps.googleusercontent.com"))
-                    .build();
+                    .build();    // verfier is created from the clientid given by the firebase to verfiy the token got while signin is valid or not so we need verfier
 
             GoogleIdToken idToken = verifier.verify(idTokenString);
             if (idToken != null) {
