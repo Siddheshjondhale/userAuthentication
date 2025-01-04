@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Collections;
 import java.util.Map;
 
@@ -28,8 +27,16 @@ private UserService userService;
         String idTokenString = tokenRequest.get("idToken");
 
         try {
+            // Retrieve the Google Client ID from environment variables
+            String clientId = System.getenv("GOOGLE_CLIENT_ID");
+
+            // If the client ID is not set throw an exception
+            if (clientId == null || clientId.isEmpty()) {
+                throw new RuntimeException("Google Client ID is not set.");
+            }
+
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                    .setAudience(Collections.singletonList("1077300351364-u2t3sipd82lq1fcsaaee9c11or7irhag.apps.googleusercontent.com"))
+                    .setAudience(Collections.singletonList(clientId))
                     .build();    // verfier is created from the clientid given by the firebase to verfiy the token got while signin is valid or not so we need verfier
 
             GoogleIdToken idToken = verifier.verify(idTokenString);
