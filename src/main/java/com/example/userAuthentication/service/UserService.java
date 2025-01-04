@@ -13,7 +13,7 @@ public class UserService {
     private UserRepository userRepository;
 
     public User registerOrUpdateUser(String email, String googleId, String name) {
-        String hashUserId= HashUtil.hash(googleId,16);
+        String hashUserId= HashUtil.hash(googleId,64);
         User user = userRepository.findByEmail(googleId);
 
         if (user == null) { // If user doesn't exist, create a new one
